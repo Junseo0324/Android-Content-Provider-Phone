@@ -1,6 +1,7 @@
 package com.devhjs.getphonenumber.domain.usecase
 
 import com.devhjs.getphonenumber.domain.model.Contact
+import com.devhjs.getphonenumber.util.KoreanChosung
 import javax.inject.Inject
 
 class SearchContactsUseCase @Inject constructor() {
@@ -12,11 +13,9 @@ class SearchContactsUseCase @Inject constructor() {
     operator fun invoke(query: String, contacts: List<Contact>): List<Contact> {
         if (query.isBlank()) return contacts
         
-        // TODO: Implement Cho-sung search logic here or delegate to a utility
         return contacts.filter { contact ->
-            contact.name.contains(query, ignoreCase = true) || 
+            KoreanChosung.match(contact.name, query) || 
             contact.phoneNumber.contains(query)
-            // Add Cho-sung match logic later
         }
     }
 }
