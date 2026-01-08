@@ -2,7 +2,6 @@ package com.devhjs.getphonenumber.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.devhjs.getphonenumber.domain.model.Contact
 import com.devhjs.getphonenumber.domain.usecase.GetContactsUseCase
 import com.devhjs.getphonenumber.domain.usecase.SearchContactsUseCase
 import com.devhjs.getphonenumber.domain.usecase.ToggleFavoriteUseCase
@@ -23,8 +22,7 @@ class ContactViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery
-
+    
     private val _allContacts = getContactsUseCase()
         .stateIn(
             scope = viewModelScope,
@@ -32,21 +30,27 @@ class ContactViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    val contacts: StateFlow<List<Contact>> = combine(_allContacts, _searchQuery) { contacts, query ->
-        searchContactsUseCase(query, contacts)
+    val uiState: StateFlow<ContactUiState> = combine(_allContacts, _searchQuery) { contacts, query ->
+        ContactUiState(
+            contacts = searchContactsUseCase(query, contacts),
+            searchQuery = query
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
+        initialValue = ContactUiState()
     )
 
-    fun onSearchQueryChange(query: String) {
-        _searchQuery.value = query
-    }
-
-    fun onToggleFavorite(contact: Contact) {
-        viewModelScope.launch {
-            toggleFavoriteUseCase(contact.id, !contact.isFavorite)
+    fun onAction(action: ContactAction) {
+        when (action) {
+            is ContactAction.OnSearchQueryChange -> {
+                _searchQuery.value = action.query
+            }
+            is ContactAction.OnToggleFavorite -> {
+                viewModelScope.launch {
+                    toggleFavoriteUseCase(action.id, !action.isFavorite)
+                }
+            }
         }
     }
 }
