@@ -7,7 +7,6 @@ import com.devhjs.getphonenumber.domain.model.Contact
 import com.devhjs.getphonenumber.domain.repository.ContactRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class ContactRepositoryImpl @Inject constructor(
@@ -16,9 +15,7 @@ class ContactRepositoryImpl @Inject constructor(
 ) : ContactRepository {
 
     override fun getContactsFlow(): Flow<List<Contact>> {
-        val systemContactsFlow = flow {
-            emit(contactDataSource.getSystemContacts())
-        }
+        val systemContactsFlow = contactDataSource.getSystemContacts()
         val favoriteIdsFlow = favoriteDao.getFavoriteIds()
 
         return systemContactsFlow.combine(favoriteIdsFlow) { contacts, favoriteIds ->
