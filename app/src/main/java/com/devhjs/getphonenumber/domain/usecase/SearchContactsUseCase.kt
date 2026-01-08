@@ -5,11 +5,7 @@ import com.devhjs.getphonenumber.util.KoreanChosung
 import javax.inject.Inject
 
 class SearchContactsUseCase @Inject constructor() {
-    
-    /**
-     * Filters the list of contacts based on the search query.
-     * Supports Korean Initial Consonant (Cho-sung) search.
-     */
+
     operator fun invoke(query: String, contacts: List<Contact>): List<Contact> {
         if (query.isBlank()) return contacts
         
